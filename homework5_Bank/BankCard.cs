@@ -2,7 +2,7 @@ namespace homework5_Bank;
 
 public class BankCard
 {
-    public BankCard(string bankName, string fullname, string pan, string pin, string expDate, decimal budget)
+    public BankCard(string bankName, string fullname, string pan, string pin, string expDate, int budget)
     {
         BankName = bankName;
         Fullname = fullname;
@@ -20,6 +20,6 @@ public class BankCard
     public string PIN { get; set; }
     public int CVC { get; set; }
     public string ExpDate { get; set; }
-    public decimal Budget { get; set; }
+    public int ?Budget { get; set; }
     
 }

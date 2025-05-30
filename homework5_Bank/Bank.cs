@@ -47,7 +47,7 @@ public class Bank
         }
     }
     
-    public void Withdraw(string PAN, string PIN,decimal amount)
+    public void Withdraw(string PAN, string PIN,int amount)
     {
         int index = SearchClient(PAN);
         if (index != -1)
@@ -59,7 +59,7 @@ public class Bank
                     clients[index].Card.Budget -= amount;
                     Console.WriteLine("Success");
 
-                    clients[index].Transactions =AddStringToArray(clients[index].Transactions, $@"Withdraw {DateTime.Now}");
+                    clients[index].Transactions =AddStringToArray(clients[index].Transactions, $"Withdraw {DateTime.Now.Day}.{DateTime.Now.Month}.{DateTime.Now.Year}");
                 }
                 else
                 {
@@ -76,8 +76,7 @@ public class Bank
             throw new ApplicationException("Client not found");
         }
     }
-
-    public void Transfer(string PAN, string PANtoTransfer, string PIN, decimal amount)
+    public void Transfer(string PAN, string PANtoTransfer, string PIN, int sendAmount)
     {
         int index = SearchClient(PAN);
         int index2 = SearchClient(PANtoTransfer);
@@ -85,32 +84,36 @@ public class Bank
         {
             if (clients[index].Card.PIN == PIN)
             {
-                if (clients[index].Card.Budget >= amount)
+                if (index2 != -1)
                 {
-                    clients[index].Card.Budget -= amount;
-                    if (index2 != -1)
+                    if (clients[index].Card.Budget >= sendAmount)
                     {
-                        clients[index2].Card.Budget += amount;
+                        clients[index].Card.Budget -= sendAmount;
+                        clients[index2].Card.Budget += sendAmount;
+                        Console.WriteLine("Succesfully transfered...");
+                        clients[index].Transactions =AddStringToArray(clients[index].Transactions, $"Transfer {DateTime.Now.Day}.{DateTime.Now.Month}.{DateTime.Now.Year}");
                     }
-                    Console.WriteLine("Succesfully transfered...");
-                    clients[index].Transactions.Append($@"Transfer {DateTime.Now}");
-                   }
+                    else
+                    {
+                        throw new InsufficientBalanceException("Insufficient balance");
+                    }
+                }
                 else
                 {
-                    throw new ApplicationException("Insufficient balance");
+                    throw new NotFoundException("There is no correct PAN to transfer");
                 }
             }
             else
             {
-                throw new ApplicationException("PIN does not match");
+                throw new PINCanNotMatchException("PIN does not match");
             }
         }
         else
         {
-            throw new ApplicationException("Client not found");
+            throw new NotFoundException("Client not found");
         }
     }
-//8den baslayir tarix   withdraw 30.05.2025
+
     public void ShowHistory(string PAN, string PIN)
     {
         int index = SearchClient(PAN);
@@ -123,13 +126,14 @@ public class Bank
                     Console.WriteLine("Today: ");
                     for (int i = 0; i < clients[index].Transactions.Length; i++)
                     {
-                        if (clients[index].Transactions[i].Contains((DateTime.Now.Day+"."+DateTime.Now.Month+"."+DateTime.Now.Year).ToString()))
+                        string str = $"{DateTime.Now.Day}.{DateTime.Now.Month}.{DateTime.Now.Year}";
+                        if (clients[index].Transactions[i].Contains(str))
                         {
                             Console.WriteLine(clients[index].Transactions[i]);
                         }
                     }
 
-                    Console.WriteLine("Last 5 days: ");
+                    Console.WriteLine("\nLast 5 days: ");
                     for (int i = 0; i < clients[index].Transactions.Length; i++)
                     {
                         if (int.Parse(clients[index].Transactions[i].Substring(9, 2)) < DateTime.Now.Day &&
